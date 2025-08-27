@@ -1,0 +1,286 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Chúc Mừng Sinh Nhật — 2 Hello Kitty</title>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+  <style>
+    html,body{height:100%;margin:0;padding:0}
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: black;
+      color: white;
+      font-family: 'Pacifico', cursive;
+      text-align: center;
+    }
+
+    /* Stars */
+    .star{position:absolute;background:white;border-radius:50%;animation:twinkle 2s infinite;z-index:1}
+    @keyframes twinkle{0%,100%{opacity:1}50%{opacity:0.2}}
+
+    /* Texts */
+    #wish1{position:absolute;top:15%;left:50%;transform:translateX(-50%);font-size:50px;color:#ff4fa7;text-shadow:3px 3px 10px #fff;animation:fadeIn 2s}
+    #wish2{position:absolute;top:25%;left:50%;width:80%;transform:translateX(-50%);font-size:24px;line-height:1.5;color:#ffd700;text-shadow:2px 2px 6px #ff69b4;animation:fadeIn 3s}
+    @keyframes fadeIn{from{opacity:0;transform:scale(0.9)}to{opacity:1;transform:scale(1)}}
+
+    /* Cake */
+    #cake{position:absolute;bottom:10%;left:50%;transform:translateX(-50%);width:200px;height:120px;z-index:10}
+    .cake-base{width:200px;height:80px;background:#ffb347;border-radius:10px;position:absolute;bottom:0}
+    .cake-top{width:200px;height:40px;background:#ff69b4;border-radius:10px 10px 0 0;position:absolute;top:0}
+    .candle{width:12px;height:40px;background:#fff;position:absolute;top:-40px;left:50%;transform:translateX(-50%)}
+    .flame{width:20px;height:20px;background:radial-gradient(circle,yellow 40%,orange 70%,transparent 100%);border-radius:50%;position:absolute;top:-20px;left:50%;transform:translateX(-50%);animation:flicker .3s infinite}
+    @keyframes flicker{0%{transform:translateX(-50%) scale(1);opacity:1}50%{transform:translateX(-50%) scale(1.18);opacity:.72}100%{transform:translateX(-50%) scale(1);opacity:1}}
+
+    /* Final message */
+    #final-message{position:absolute;top:40%;width:100%;font-size:40px;color:#FFD700;text-shadow:3px 3px 8px #FF4500;display:none;z-index:30;animation:fadeIn 1.4s}
+
+    /* Layers */
+    #fireworks{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2}
+    #hearts{position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:9}
+
+    /* Kitty wrappers (fixed in corners) */
+    .kittyWrap{position:fixed;bottom:14px;width:160px;height:auto;cursor:pointer;z-index:12;user-select:none}
+    #kitty-left{left:14px}
+    #kitty-right{right:14px;transform:scaleX(-1)} /* flip right kitty horizontally */
+
+    /* Heart graphics (gradient masked) */
+    .heart{
+      position:absolute;
+      width:40px;
+      height:36px;
+      pointer-events:none;
+      background-image: linear-gradient(135deg,#ff99d6 0%,#ff66b2 45%,#d94ec9 100%);
+      -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 29'><path d='M23.6 2c-2.5 0-4.9 1.6-6.1 3.8C15.3 3.6 12.9 2 10.4 2 6.1 2 3 5.2 3 9.7c0 7.4 13 14.9 13 14.9s13-7.5 13-14.9C29 5.2 25.9 2 23.6 2z' fill='white'/></svg>");
+      -webkit-mask-repeat:no-repeat;
+      -webkit-mask-position:center;
+      -webkit-mask-size:contain;
+      mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 29'><path d='M23.6 2c-2.5 0-4.9 1.6-6.1 3.8C15.3 3.6 12.9 2 10.4 2 6.1 2 3 5.2 3 9.7c0 7.4 13 14.9 13 14.9s13-7.5 13-14.9C29 5.2 25.9 2 23.6 2z' fill='white'/></svg>");
+      mask-repeat:no-repeat;
+      mask-position:center;
+      mask-size:contain;
+      filter:drop-shadow(0 10px 18px rgba(217,78,201,0.12));
+      transform-origin:center;
+      opacity:0;
+    }
+
+    .glow{position:absolute;border-radius:50%;filter:blur(14px);pointer-events:none;opacity:.7;z-index:8}
+
+    @media (max-width:480px){
+      .kittyWrap{width:110px;bottom:10px}
+      #wish1{font-size:32px}
+      #wish2{font-size:16px}
+    }
+  </style>
+</head>
+<body>
+  <!-- fireworks canvas -->
+  <canvas id="fireworks"></canvas>
+
+  <!-- hearts layer -->
+  <div id="hearts" aria-hidden="true"></div>
+
+  <!-- stars (created by JS) -->
+
+  <!-- texts & cake -->
+  <div id="wish1">🎂 Chúc tẹt sinh nhật vui vẻ 🎂</div>
+  <div id="wish2">
+    Chúc tẹt sau này sẽ gặp được mọi may mắn trong cuộc sống, hãy sống tốt và đạt được giấc mơ của mình.
+    Chúc tẹt chân cứng đá mềm, đường xa không mỏi và có một cuộc sống như mong ước nhé!
+  </div>
+
+  <div id="cake">
+    <div class="cake-top"></div>
+    <div class="cake-base"></div>
+    <div class="candle"></div>
+    <div class="flame"></div>
+  </div>
+
+  <!-- Kitty SVG inline: left & right -->
+  <div id="kitty-left" class="kittyWrap" title="Click để bắn tim (trái)">
+    <svg viewBox="0 0 200 260" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <ellipse cx="100" cy="110" rx="72" ry="70" fill="#fff" stroke="#e6dfe6" stroke-width="2"/>
+      <path d="M36 56 L18 6 L64 36 Z" fill="#fff" stroke="#e6dfe6" stroke-width="2"/>
+      <path d="M164 56 L182 6 L136 36 Z" fill="#fff" stroke="#e6dfe6" stroke-width="2"/>
+      <path d="M46 50 L34 18 L58 34 Z" fill="#ffd6e2" opacity="0.98"/>
+      <path d="M154 50 L166 18 L142 34 Z" fill="#ffd6e2" opacity="0.98"/>
+      <ellipse cx="74" cy="110" rx="6" ry="9" fill="#131313"/>
+      <ellipse cx="126" cy="110" rx="6" ry="9" fill="#131313"/>
+      <ellipse cx="100" cy="132" rx="7" ry="5" fill="#ffb3c9"/>
+      <path d="M30 126 L74 126" stroke="#000" stroke-opacity="0.22" stroke-width="2"/>
+      <path d="M30 138 L74 136" stroke="#000" stroke-opacity="0.18" stroke-width="2"/>
+      <path d="M170 126 L126 126" stroke="#000" stroke-opacity="0.22" stroke-width="2"/>
+      <path d="M170 138 L126 136" stroke="#000" stroke-opacity="0.18" stroke-width="2"/>
+      <g transform="translate(58,60)">
+        <ellipse cx="0" cy="0" rx="17" ry="14" fill="#ff3fa0"/>
+        <ellipse cx="40" cy="0" rx="17" ry="14" fill="#ff3fa0"/>
+        <circle cx="20" cy="0" r="10" fill="#ffd6e2"/>
+      </g>
+    </svg>
+  </div>
+
+  <div id="kitty-right" class="kittyWrap" title="Click để bắn tim (phải)">
+    <!-- same SVG (flipped by CSS) -->
+    <svg viewBox="0 0 200 260" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <ellipse cx="100" cy="110" rx="72" ry="70" fill="#fff" stroke="#e6dfe6" stroke-width="2"/>
+      <path d="M36 56 L18 6 L64 36 Z" fill="#fff" stroke="#e6dfe6" stroke-width="2"/>
+      <path d="M164 56 L182 6 L136 36 Z" fill="#fff" stroke="#e6dfe6" stroke-width="2"/>
+      <path d="M46 50 L34 18 L58 34 Z" fill="#ffd6e2" opacity="0.98"/>
+      <path d="M154 50 L166 18 L142 34 Z" fill="#ffd6e2" opacity="0.98"/>
+      <ellipse cx="74" cy="110" rx="6" ry="9" fill="#131313"/>
+      <ellipse cx="126" cy="110" rx="6" ry="9" fill="#131313"/>
+      <ellipse cx="100" cy="132" rx="7" ry="5" fill="#ffb3c9"/>
+      <path d="M30 126 L74 126" stroke="#000" stroke-opacity="0.22" stroke-width="2"/>
+      <path d="M30 138 L74 136" stroke="#000" stroke-opacity="0.18" stroke-width="2"/>
+      <path d="M170 126 L126 126" stroke="#000" stroke-opacity="0.22" stroke-width="2"/>
+      <path d="M170 138 L126 136" stroke="#000" stroke-opacity="0.18" stroke-width="2"/>
+      <g transform="translate(58,60)">
+        <ellipse cx="0" cy="0" rx="17" ry="14" fill="#ff3fa0"/>
+        <ellipse cx="40" cy="0" rx="17" ry="14" fill="#ff3fa0"/>
+        <circle cx="20" cy="0" r="10" fill="#ffd6e2"/>
+      </g>
+    </svg>
+  </div>
+
+  <div id="final-message">🎉 Thành giữ lời hứa với tẹt roi nhen 🎉</div>
+
+  <script>
+    // --- Stars ---
+    for (let i = 0; i < 100; i++) {
+      const star = document.createElement("div");
+      star.className = "star";
+      const size = Math.random() * 3 + 1;
+      star.style.width = size + "px";
+      star.style.height = size + "px";
+      star.style.top = Math.random() * window.innerHeight + "px";
+      star.style.left = Math.random() * window.innerWidth + "px";
+      star.style.animationDuration = (Math.random() * 3 + 1) + "s";
+      document.body.appendChild(star);
+    }
+
+    // --- Fireworks canvas ---
+    const canvas = document.getElementById('fireworks');
+    const ctx = canvas.getContext('2d');
+    function resizeCanvas(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Particle {
+      constructor(x,y,color){ this.x=x;this.y=y;this.color=color;this.radius=Math.random()*2+1;this.speedX=(Math.random()-0.5)*6;this.speedY=(Math.random()-0.5)*6;this.life=100; }
+      update(){ this.x += this.speedX; this.y += this.speedY; this.life--; }
+      draw(){ ctx.beginPath(); ctx.arc(this.x,this.y,this.radius,0,Math.PI*2); ctx.fillStyle=this.color; ctx.fill(); }
+    }
+    let fireworks = [];
+    function animate() {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      for (let i = fireworks.length - 1; i >= 0; i--) {
+        fireworks[i].update();
+        fireworks[i].draw();
+        if (fireworks[i].life <= 0) fireworks.splice(i,1);
+      }
+      requestAnimationFrame(animate);
+    }
+    function createFirework(){
+      const x = Math.random()*canvas.width;
+      const y = Math.random()*canvas.height/2;
+      const colors = ["#ff0043","#fffb00","#00ffea","#ff7b00"];
+      for (let i=0;i<50;i++) fireworks.push(new Particle(x,y,colors[Math.floor(Math.random()*colors.length)]));
+    }
+    animate();
+    setInterval(createFirework,700);
+
+    // --- Hearts system ---
+    const heartsLayer = document.getElementById('hearts');
+    const leftKitty = document.getElementById('kitty-left');
+    const rightKitty = document.getElementById('kitty-right');
+
+    function createHeartAt(x, y, size= null) {
+      const el = document.createElement('div');
+      el.className = 'heart';
+      const s = size || (Math.random()*24 + 28);
+      el.style.width = s + 'px';
+      el.style.height = (s * 0.9) + 'px';
+      el.style.left = (x - s/2) + 'px';
+      el.style.top = (y - s/2) + 'px';
+      heartsLayer.appendChild(el);
+
+      // optional glow
+      if (Math.random() < 0.32) {
+        const g = document.createElement('div');
+        g.className = 'glow';
+        g.style.width = (s*1.6) + 'px';
+        g.style.height = (s*1.6) + 'px';
+        g.style.left = (x - s*0.8) + 'px';
+        g.style.top = (y - s*0.8) + 'px';
+        g.style.background = 'radial-gradient(circle, rgba(255,150,210,0.9), rgba(217,78,201,0.04))';
+        heartsLayer.appendChild(g);
+        setTimeout(()=>g.remove(), 1000 + Math.random()*900);
+      }
+
+      // animate
+      const start = performance.now();
+      const duration = 1400 + Math.random()*1800;
+      const driftX = (Math.random()*280) - 140;
+      const peakY = -80 - Math.random()*180;
+      const rotate = (Math.random()*120) - 60;
+
+      function frame(t){
+        const p = Math.min(1, (t - start)/duration);
+        const e = 1 - Math.pow(1 - p, 3);
+        const cx = x + driftX * e;
+        const cy = y + peakY * Math.sin(p * Math.PI * 0.85) - p * 40;
+        el.style.transform = `translate(${cx - x}px, ${cy - y}px) rotate(${rotate*e}deg) scale(${1 - 0.22*e})`;
+        el.style.opacity = String(1 - e);
+        if (p < 1) requestAnimationFrame(frame);
+        else el.remove();
+      }
+      requestAnimationFrame(frame);
+    }
+
+    function shootFrom(kittyElem, count=6){
+      const rect = kittyElem.getBoundingClientRect();
+      const startX = rect.left + rect.width * 0.6;
+      const startY = rect.top + rect.height * 0.45;
+      for (let i=0;i<count;i++){
+        setTimeout(()=> createHeartAt(startX + (Math.random()*36 - 18), startY + (Math.random()*18 - 8)), i*(20 + Math.random()*120));
+      }
+    }
+
+    // Click handlers
+    leftKitty.addEventListener('click', ()=> shootFrom(leftKitty, Math.round(6 + Math.random()*8)));
+    rightKitty.addEventListener('click', ()=> shootFrom(rightKitty, Math.round(6 + Math.random()*8)));
+
+    // Auto-shoot from both kitties every ~900-1300ms
+    const autoInterval = setInterval(()=>{
+      shootFrom(leftKitty, Math.round(4 + Math.random()*6));
+      shootFrom(rightKitty, Math.round(4 + Math.random()*6));
+    }, 900 + Math.random()*400);
+
+    // Cap DOM nodes to avoid memory growth
+    setInterval(()=>{
+      const children = heartsLayer.children;
+      if (children.length > 300) {
+        for (let i=0;i<60 && heartsLayer.firstChild; i++) heartsLayer.removeChild(heartsLayer.firstChild);
+      }
+    }, 1200);
+
+    // After 15s: hide scene, stop autos, show final message
+    setTimeout(()=>{
+      document.getElementById('wish1').style.display = 'none';
+      document.getElementById('wish2').style.display = 'none';
+      document.getElementById('cake').style.display = 'none';
+      canvas.style.display = 'none';
+      leftKitty.style.display = 'none';
+      rightKitty.style.display = 'none';
+      clearInterval(autoInterval);
+      document.getElementById('final-message').style.display = 'block';
+    }, 15000);
+
+    // Small accessibility: stop animations if reduced-motion
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      // remove intervals
+      clearInterval(autoInterval);
+    }
+  </script>
+</body>
+</html>
